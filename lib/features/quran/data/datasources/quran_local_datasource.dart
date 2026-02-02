@@ -1,7 +1,5 @@
 import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../domain/entities/surah.dart';
-import '../../domain/entities/juz_verse.dart';
 import '../models/surah_model.dart';
 import '../models/juz_verse_model.dart';
 

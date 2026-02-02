@@ -39,3 +39,11 @@ class SaveLastRead extends QuranEvent {
   @override
   List<Object> get props => [surahName, surahId, ayahNumber];
 }
+
+class SearchQuran extends QuranEvent {
+  final String query;
+  const SearchQuran(this.query);
+
+  @override
+  List<Object?> get props => [query];
+}

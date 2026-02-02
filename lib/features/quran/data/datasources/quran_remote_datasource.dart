@@ -42,28 +42,33 @@ class QuranRemoteDataSourceImpl implements QuranRemoteDataSource {
     return rawVerses.map<JuzVerse>((raw) {
       final v = raw as Map<String, dynamic>;
 
-      // Safe parsing to prevent "Null is not a subtype of Map"
-      final number = v['number'];
-      final surah = v['surah'];
-
-      // Default values or skip if critical data is missing
-      // (Here we use default values to keep the UI showing something rather than crashing)
-      final surahMap = surah is Map<String, dynamic> ? surah : <String, dynamic>{};
-      final numberMap = number is Map<String, dynamic> ? number : <String, dynamic>{};
-
-      final surahNameMap = surahMap['name'] is Map<String, dynamic> ? surahMap['name'] : <String, dynamic>{};
-      final transliterationMap = surahNameMap['transliteration'] is Map<String, dynamic> ? surahNameMap['transliteration'] : <String, dynamic>{};
+      final number = v['number'] as Map<String, dynamic>? ?? {};
+      final surahRaw = v['surah'];
       
-      final surahName = (transliterationMap['id'] as String?) ?? 'Unknown Surah';
-      
-      final textMap = v['text'] is Map<String, dynamic> ? v['text'] : <String, dynamic>{};
-      final translationMap = v['translation'] is Map<String, dynamic> ? v['translation'] : <String, dynamic>{};
-      final audioMap = v['audio'] is Map<String, dynamic> ? v['audio'] : <String, dynamic>{};
+      Map<String, dynamic> surahMap = {};
+      int surahNumber = 0;
+      String surahName = 'Unknown Surah';
+
+      if (surahRaw is Map<String, dynamic>) {
+        surahMap = surahRaw;
+        surahNumber = surahMap['number'] as int? ?? 0;
+        
+        final surahNameMap = surahMap['name'] as Map<String, dynamic>? ?? {};
+        final transliterationMap = surahNameMap['transliteration'] as Map<String, dynamic>? ?? {};
+        surahName = (transliterationMap['id'] as String?) ?? (transliterationMap['en'] as String?) ?? 'Unknown Surah';
+      } else if (surahRaw is int) {
+        surahNumber = surahRaw;
+      }
+
+      final textMap = v['text'] as Map<String, dynamic>? ?? {};
+      final translationMap = v['translation'] as Map<String, dynamic>? ?? {};
+      final audioMap = v['audio'] as Map<String, dynamic>? ?? {};
 
       return JuzVerse(
         juz: juz,
-        ayahNumber: (numberMap['inSurah'] as int?) ?? 0,
-        surahNumber: (surahMap['number'] as int?) ?? 0,
+        ayahNumber: (number['inSurah'] as int?) ?? 0,
+        inQuran: (number['inQuran'] as int?) ?? 0,
+        surahNumber: surahNumber,
         surahName: surahName,
         arab: (textMap['arab'] as String?) ?? '',
         translation: (translationMap['id'] as String?) ?? '',

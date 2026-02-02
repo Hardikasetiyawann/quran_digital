@@ -1,9 +1,12 @@
-part of 'last_read_bloc.dart';
+import 'package:equatable/equatable.dart';
+import '../../domain/entities/last_read.dart';
 
-abstract class LastReadState extends Equatable {
-  const LastReadState();  
+class LastReadState extends Equatable {
+  final List<LastRead> history;
+  final bool loading;
+
+  const LastReadState({this.history = const [], this.loading = false});
 
   @override
-  List<Object> get props => [];
+  List<Object> get props => [history, loading];
 }
-class LastReadInitial extends LastReadState {}

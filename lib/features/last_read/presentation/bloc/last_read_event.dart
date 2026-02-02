@@ -1,4 +1,4 @@
-part of 'last_read_bloc.dart';
+import 'package:equatable/equatable.dart';
 
 abstract class LastReadEvent extends Equatable {
   const LastReadEvent();
@@ -6,3 +6,5 @@ abstract class LastReadEvent extends Equatable {
   @override
   List<Object> get props => [];
 }
+
+class LoadLastReadHistory extends LastReadEvent {}

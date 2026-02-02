@@ -1,58 +1,79 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../bloc/quran_bloc.dart';
-import '../bloc/quran_event.dart';
-import '../bloc/quran_state.dart';
-import 'surah_detail_page.dart';
-
+import '../bloc/last_read_bloc.dart';
+import '../bloc/last_read_event.dart';
+import '../bloc/last_read_state.dart';
+import '../../../quran/presentation/pages/surah_detail_page.dart';
+import '../../../quran/presentation/bloc/quran_bloc.dart';
 import '../../../../core/utils/app_colors.dart';
 
-class SurahPage extends StatefulWidget {
-  const SurahPage({super.key});
+class LastReadPage extends StatefulWidget {
+  const LastReadPage({super.key});
 
   @override
-  State<SurahPage> createState() => _SurahPageState();
+  State<LastReadPage> createState() => _LastReadPageState();
 }
 
-class _SurahPageState extends State<SurahPage> {
+class _LastReadPageState extends State<LastReadPage> {
   @override
   void initState() {
     super.initState();
-    final bloc = context.read<QuranBloc>();
-    if (bloc.state.surahs.isEmpty) {
-      bloc.add(LoadSurahList());
-    }
+    context.read<LastReadBloc>().add(LoadLastReadHistory());
   }
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<QuranBloc, QuranState>(
-      buildWhen: (prev, curr) =>
-          prev.surahs != curr.surahs || prev.loadingSurah != curr.loadingSurah,
-      builder: (context, state) {
-        if (state.loadingSurah && state.surahs.isEmpty) {
-          return const Center(child: CircularProgressIndicator());
-        }
+    return Scaffold(
+      backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.white,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: AppColors.textSecondary),
+          onPressed: () => Navigator.pop(context),
+        ),
+        title: const Text(
+          'Terakhir Dibaca',
+          style: TextStyle(
+            color: AppColors.primary,
+            fontWeight: FontWeight.bold,
+            fontSize: 20,
+          ),
+        ),
+        centerTitle: false,
+      ),
+      body: BlocBuilder<LastReadBloc, LastReadState>(
+        builder: (context, state) {
+          if (state.loading) {
+            return const Center(child: CircularProgressIndicator());
+          }
 
-        if (state.surahs.isEmpty) {
-          return const Center(child: Text('Tidak ada data surah'));
-        }
+          if (state.history.isEmpty) {
+            return const Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.history, size: 80, color: AppColors.cardGrey),
+                  SizedBox(height: 16),
+                  Text(
+                    'Belum ada riwayat bacaan',
+                    style: TextStyle(color: AppColors.textSecondary, fontSize: 16),
+                  ),
+                ],
+              ),
+            );
+          }
 
-        return RefreshIndicator(
-          color: AppColors.primary,
-          onRefresh: () async {
-            context.read<QuranBloc>().add(LoadSurahList());
-          },
-          child: ListView.separated(
+          return ListView.separated(
             padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-            itemCount: state.surahs.length,
+            itemCount: state.history.length,
             separatorBuilder: (context, index) => Divider(
               height: 1,
               color: AppColors.backgroundSecondary,
             ),
-            itemBuilder: (context, index) {
-              final surah = state.surahs[index];
+            itemBuilder: (_, i) {
+              final h = state.history[i];
 
               return InkWell(
                 onTap: () {
@@ -62,25 +83,31 @@ class _SurahPageState extends State<SurahPage> {
                       builder: (_) => BlocProvider.value(
                         value: context.read<QuranBloc>(),
                         child: SurahDetailPage(
-                          surahId: surah.number,
-                          surahName: surah.latin,
+                          surahId: h.surahId,
+                          surahName: h.surahName,
+                          targetAyah: h.ayahNumber,
                         ),
                       ),
                     ),
-                  );
+                  ).then((_) {
+                    // Refresh history when coming back from detail
+                    if (mounted) {
+                      context.read<LastReadBloc>().add(LoadLastReadHistory());
+                    }
+                  });
                 },
                 child: Padding(
                   padding: const EdgeInsets.symmetric(vertical: 12),
                   child: Row(
                     children: [
-                      _buildNumberIcon(surah.number),
+                      _buildNumberIcon(h.surahId),
                       const SizedBox(width: 16),
                       Expanded(
                         child: Column(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             Text(
-                              surah.latin,
+                              h.surahName,
                               style: const TextStyle(
                                 color: AppColors.textPrimary,
                                 fontWeight: FontWeight.bold,
@@ -89,33 +116,25 @@ class _SurahPageState extends State<SurahPage> {
                             ),
                             const SizedBox(height: 4),
                             Text(
-                              '${surah.revelation} • ${surah.verses} AYAT',
+                              'Ayat ke-${h.ayahNumber}',
                               style: const TextStyle(
                                 color: AppColors.textSecondary,
-                                fontSize: 12,
+                                fontSize: 14,
                                 fontWeight: FontWeight.w500,
                               ),
                             ),
                           ],
                         ),
                       ),
-                      Text(
-                        surah.name,
-                        style: const TextStyle(
-                          color: AppColors.primary,
-                          fontSize: 22,
-                          fontWeight: FontWeight.bold,
-                          fontFamily: 'Amiri',
-                        ),
-                      ),
+                      const Icon(Icons.chevron_right_rounded, color: AppColors.primary),
                     ],
                   ),
                 ),
               );
             },
-          ),
-        );
-      },
+          );
+        },
+      ),
     );
   }
 
@@ -130,7 +149,7 @@ class _SurahPageState extends State<SurahPage> {
         alignment: Alignment.center,
         children: [
           Transform.rotate(
-            angle: 0.785, // 45 degrees
+            angle: 0.785,
             child: Container(
               width: 28,
               height: 28,

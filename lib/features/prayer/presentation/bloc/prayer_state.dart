@@ -1,4 +1,4 @@
-part of 'prayer_bloc.dart';
+import 'package:equatable/equatable.dart';
 
 abstract class PrayerState extends Equatable {
   const PrayerState();  

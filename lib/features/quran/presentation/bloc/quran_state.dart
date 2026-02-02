@@ -19,6 +19,8 @@ class QuranState extends Equatable {
 
   final String? error;
   final Map<String, dynamic>? lastRead;
+  final List<dynamic> searchResults;
+  final bool isSearching;
 
   const QuranState({
     this.surahs = const [],
@@ -30,6 +32,8 @@ class QuranState extends Equatable {
     this.loadingJuz = false,
     this.error,
     this.lastRead,
+    this.searchResults = const [],
+    this.isSearching = false,
   });
 
   QuranState copyWith({
@@ -42,6 +46,8 @@ class QuranState extends Equatable {
     bool? loadingJuz,
     String? error,
     Map<String, dynamic>? lastRead,
+    List<dynamic>? searchResults,
+    bool? isSearching,
   }) {
     return QuranState(
       surahs: surahs ?? this.surahs,
@@ -53,6 +59,8 @@ class QuranState extends Equatable {
       loadingJuz: loadingJuz ?? this.loadingJuz,
       error: error,
       lastRead: lastRead ?? this.lastRead,
+      searchResults: searchResults ?? this.searchResults,
+      isSearching: isSearching ?? this.isSearching,
     );
   }
 
@@ -67,5 +75,7 @@ class QuranState extends Equatable {
     loadingJuz,
     error,
     lastRead,
+    searchResults,
+    isSearching,
   ];
 }

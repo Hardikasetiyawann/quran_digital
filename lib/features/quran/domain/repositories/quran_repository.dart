@@ -14,4 +14,6 @@ abstract class QuranRepository {
 
   Future<void> saveLastRead(String surahName, int surahId, int ayahNumber);
   Future<Map<String, dynamic>?> getLastRead();
+
+  Future<List<dynamic>> searchQuran(String query);
 }
