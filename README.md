@@ -147,5 +147,3 @@ This project is **open-source** and intended for educational and personal develo
 ---
 
 📖 *May this application help users read, reflect, and stay connected with the Qur’an.*
-
-```
